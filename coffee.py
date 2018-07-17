@@ -79,3 +79,13 @@ print(ratings)
 # Merge the header list with ratings list to create our dict
 dict_of_ratings = dict(zip(header[1:], ratings))
 print(dict_of_ratings)
+
+# Create list of names
+# From out dict none_values_dict, create a names list
+names_list = []
+
+for k, v in none_values_dict.items():
+   print(k)
+   names_list.append(k)
+
+print('Names list : ', names_list)
