@@ -2,8 +2,9 @@ def random_name(names_list):
 
   hold=[]
   ctr = 0
-  print('Here...')
+  tries = 0
 
+  print('Here...')
   noMatch = True
 
   while noMatch:
@@ -26,9 +27,11 @@ def random_name(names_list):
               # Set noMatch to False
               noMatch = False
 
+     tries =+ tries + 1
      # Reset ctr to 0
      ctr = 0
 
+  print('it took ', tries, ' tries to get all three matches')
   return True
 
 first_line = 1
