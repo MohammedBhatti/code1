@@ -1,3 +1,36 @@
+def random_name(names_list):
+
+  hold=[]
+  ctr = 0
+  print('Here...')
+
+  noMatch = True
+
+  while noMatch:
+     # Populate the hold[] list
+     hold=[]
+     for i in range(1,4):
+        hold.append((random.choice(names_list)))
+     # get the first item in the list
+     temp = hold[0]
+     # Iterate over list and compare temp to hold[1], hold[2]
+     for i in hold[1:]:
+        if temp != i:
+           print(temp, i, hold)
+           break
+        else:
+           # if hold[1] and hold[2] match temp, we have all 3 values match
+           ctr =+ ctr + 1
+           if ctr == 2:
+              print(temp, i, hold, ctr)
+              # Set noMatch to False
+              noMatch = False
+
+     # Reset ctr to 0
+     ctr = 0
+
+  return True
+
 first_line = 1
 listoflists = []
 
@@ -88,4 +121,9 @@ for k, v in none_values_dict.items():
    print(k)
    names_list.append(k)
 
-print('Names list : ', names_list)
+# print('Names list : ', names_list)
+
+import random
+import itertools
+matchFound = random_name(names_list)
+print(matchFound)
