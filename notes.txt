@@ -1,0 +1,21 @@
+lr = LinearRegression()
+feature_cols = ['al']
+X = glass[feature_cols]
+y = glass.ri
+lr = LinearRegression()
+linreg = lr.fit(X, y)
+print(X.shape)
+print(y.shape)
+print(linreg.coef_)
+dict(zip(lr.coef_,X.columns))
+y_pred = lr.predict(X)
+print(y_pred)
+y_pred = linreg.predict(X)
+print(y_pred)
+y_pred = linreg.predict(X)
+glass['y_pred'] = y_pred
+glass.head()
+print(linreg.intercept_)
+print(linreg.coef_)
+gl_typ = glass['glass_type'].value_counts().sort_index()
+print(gl_typ)
