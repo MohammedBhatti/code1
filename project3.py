@@ -101,7 +101,67 @@ plt.savefig("CRIM" + ".pdf")
 #   plt.yticks(())
 #   plt.savefig(feature + ".pdf")
 
-#from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
+from sklearn import linear_model
 
 # train/test/split to plot
 #X_train, X_test, y_train, y_test = train_test_split(feature_cols, y, random_state=123)
+
+# train/test/split with a ratio of 70% train and 30% test/split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+print (X_train.shape, y_train.shape)
+print (X_test.shape, y_test.shape)
+
+# fit the model on training data
+lm = linear_model.LinearRegression()
+model = lm.fit(X_train, y_train)
+predictions = lm.predict(X_test)
+
+# plot and score the model
+plt.scatter(y_test, predictions)
+plt.xlabel('True Values')
+plt.ylabel('Predictions')
+plt.savefig("SCENARIO1.pdf")
+print ('Score: ', model.score(X_test, y_test))
+
+# train/test/split with a ratio of 90% train and 10% test/split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+print (X_train.shape, y_train.shape)
+print (X_test.shape, y_test.shape)
+
+# fit the model on training data
+lm = linear_model.LinearRegression()
+model = lm.fit(X_train, y_train)
+predictions = lm.predict(X_test)
+
+# plot and score the model
+plt.scatter(y_test, predictions)
+plt.xlabel('True Values')
+plt.ylabel('Predictions')
+plt.savefig("SCENARIO2.pdf")
+print ('Score: ', model.score(X_test, y_test))
+
+# k-fold cross validation
+#from sklearn.model_selection import KFold
+from sklearn import model_selection, metrics
+
+# test k=5 through 10 splits
+for split_it in range(5,11):
+   kf = model_selection.KFold(n_splits=split_it, shuffle=True)
+
+   mse_values = []
+   scores = []
+   n = 0
+
+   for train_index, test_index in kf.split(X, y):
+      lr = LinearRegression().fit(X.iloc[train_index], y.iloc[train_index])
+      mse_values.append(metrics.mean_squared_error(y.iloc[test_index], lr.predict(X.iloc[test_index])))
+      scores.append(lr.score(X, y))
+      n += 1
+	  
+
+   print('Split : {}'.format(split_it))
+   print('Mean of MSE for all folds: {}'.format(np.mean(mse_values)))
+   print('Mean of R2 for all folds: {}'.format(np.mean(scores)))
+   
+   
