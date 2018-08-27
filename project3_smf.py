@@ -84,3 +84,19 @@ for key, value in formulas2.items():
 #print("Num Features: %d") % fit.n_features_
 #print("Selected Features: %s") % fit.support_
 #print("Feature Ranking: %s") % fit.ranking_
+
+y.head()
+
+X.head()
+
+sns_plot = sns.pairplot(X);
+sns_plot.savefig("c:\code\output.png")
+X.corr(method='pearson')
+
+lr = LinearRegression()
+
+lr.fit(X,y)
+
+lr.score(X,y)
+
+lr.coef_
