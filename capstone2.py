@@ -98,7 +98,7 @@ df_home_wins[['points_game']].head(100)
 def plot_all(col, idx):
    sns_displot=''
    fig1=''
-   plotname = "output" + str(idx) + ".png"
+   plotname = col + str(idx) + ".png"
    
    # get mean, median, mode, and standard deviation
    mean1=df_home_wins[col].dropna().mean()
@@ -116,7 +116,7 @@ def plot_all(col, idx):
    sns_displot = ax.axvline(mode1, color='b', linestyle='-')
 
    # set the legend
-   plt.legend({'Mean':mean,'Median':median,'Mode':mode})
+   plt.legend({'Mean':mean1,'Median':median1,'Mode':mode1})
 
    fig1 = sns_displot.get_figure()
    fig1.savefig(plotname)
@@ -131,88 +131,196 @@ def plot_all(col, idx):
    # fill the df with fill_value
    #df_home_wins[col] = df_home_wins[col].replace(np.nan, fill_value, inplace=True)
 
-COLS = ['lead_changes', 'times_tied', 'points_game',
-       'field_goals_made', 'field_goals_att', 'field_goals_pct',
-       'three_points_made', 'three_points_att', 'three_points_pct',
-       'two_points_made', 'two_points_att', 'two_points_pct', 'blocked_att',
-       'free_throws_made', 'free_throws_att', 'free_throws_pct',
-       'offensive_rebounds', 'defensive_rebounds', 'rebounds', 'assists',
-       'turnovers', 'steals', 'blocks', 'assists_turnover_ratio',
-       'personal_fouls', 'ejections', 'foulouts', 'fast_break_pts',
-       'second_chance_pts', 'team_turnovers', 'points_off_turnovers',
-       'team_rebounds', 'flagrant_fouls', 'player_tech_fouls',
-       'team_tech_fouls', 'coach_tech_fouls']
+COLS = COLS = ['lead_changes', 'times_tied', 'points_game', 'field_goals_made', 'field_goals_att',
+				'three_points_made', 'three_points_att', 'two_points_made', 'two_points_att', 'blocked_att',
+				'free_throws_made', 'free_throws_att', 'rebounds', 'assists', 'turnovers', 'steals', 'blocks',
+				'assists_turnover_ratio', 'personal_fouls', 'ejections', 'foulouts', 'fast_break_pts', 'second_chance_pts',
+				'team_turnovers', 'points_off_turnovers', 'team_rebounds']
+  
 	   
 for col in COLS:
    print(COLS.index(col))
    plot_all(col, COLS.index(col))
    
 
+# fill in NaNs with mean
+df_home_wins.fillna(df_home_wins.mean(), inplace=True)
 
-# lets gather the features that we are interested in
+# Create X and y.
+# too co-linear 
+feature_cols = ['lead_changes', 'times_tied', 'field_goals_made', 'field_goals_att',
+'three_points_made', 'three_points_att', 'two_points_made', 'two_points_att', 'blocked_att',
+'free_throws_made', 'free_throws_att', 'rebounds', 'assists', 'turnovers', 'steals', 'blocks',
+'assists_turnover_ratio', 'personal_fouls', 'ejections', 'foulouts', 'fast_break_pts', 'second_chance_pts',
+'team_turnovers', 'points_off_turnovers', 'team_rebounds']
 
-# rename population columns
-#pop_df.rename(columns={"2010 Census Population": "pop_2010", "Population Estimate, 2011": "pop_2011", "Population Estimate, 2012": "pop_2012", "Population Estimate, 2013": "pop_2013", "Population Estimate, 2014": "pop_2014", "Population Estimate, 2015": "pop_2015", "Population Estimate, 2016": "pop_2016"}, inplace = True)
+# this one seems right
+feature_cols = ['lead_changes', 'times_tied', 
+'three_points_made', 'two_points_made', 'blocked_att',
+'free_throws_made', 'free_throws_att', 'rebounds', 'assists', 'turnovers', 'steals', 'blocks',
+'assists_turnover_ratio', 'personal_fouls', 'ejections', 'foulouts', 'fast_break_pts', 'second_chance_pts',
+'team_turnovers', 'points_off_turnovers', 'team_rebounds']
 
-# for population data, remove commas and convert to int
-#for col in pop_df.columns[3:]:
-#   pop_df[col] = pop_df[col].str.replace(',', '')
-#   pop_df[col] = pop_df[col].astype(str).astype(int)
+X = df_home_wins[feature_cols]
+y = df_home_wins.points_game
 
-# get our shape
-#pop_df.shape
-#pop_df.describe(include='all')
+# check the heatmap for the above
+sns.set_palette("coolwarm", 7)
+sns_heatmap = sns.heatmap(X.corr(), vmin=-1, vmax=1)
+fig.set_size_inches(11.7, 8.27)
+fig = sns_heatmap.get_figure()
+fig.savefig("X_HeatMap.png", dpi=fig.dpi) 
 
-# columns with nan values
-#pop_df.loc[:, pop_df.isna().any()]
-#count_nan = len(pop_df) - pop_df.count()
+#TTS
 
-# popultaion >= 500000
-#pop_df[pop_df.pop_2010 >= 500000]
+# Import, instantiate, fit.
+from sklearn.linear_model import LinearRegression 
+from sklearn.model_selection import train_test_split
+# instantiate a lr model
+linreg = LinearRegression()
 
-# open health data
-#health_df = pd.read_csv('c:/code/data/health_data.csv')
-#health_df.columns
+# train/test/split 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-# join health_df to pop_df
-#result = pd.concat([pop_df, health_df], axis=1, join='inner')
+# fit the model
+linreg.fit(X_train, y_train)
 
-# keep only the columns we want
-#result = result.loc[:,~result.columns.duplicated()]
+# get the predictions
+predictions = linreg.predict(X_test)
+# Print the coefficients.
+print(linreg.intercept_)
+print(linreg.coef_)
 
-#result.describe(include='all')
+dict(zip(linreg.coef_,X.columns))
+# view the predictions
+print(predictions)
 
-# columns with nan values
-#result.loc[:, result.isna().any()]
-#count_nan = len(result) - result.count()
+## The line / model
+plt = ''
+import matplotlib.pyplot as plt
+#fig = plt.figure(figsize=(3, 6))
+#fig = plt.figure(figsize=(12, 12))
+fig = plt.figure()
+plt.scatter(y_test, predictions)
+plt.xlabel("True Values")
+plt.ylabel("Predictions")
+fig.savefig("fig2.png")
+plt.close()
 
-# examine column counts
-#result[['pop_2010', 'pop_2011', 'pop_2012']].head()
+# and check for accuracy
+print("Score:", linreg.score(X_test, y_test))
 
-# create a dataframe for analysis
-# df = result[['FIPS', 'State', 'County', ]]
+# can we improve on this using KNN
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
 
-# open our data that include population estimates for 2008 and 2009
-#pop_df2 = pd.read_csv('c:/code/data/co-est2009-alldata.csv')
 
-# drop columns we don't need
-#pop_df2.drop(['SUMLEV', 'REGION', 'DIVISION', 'STATE'], axis=1, inplace=True)
+# Find test accuracy for all values of K between 1 and 100 (inclusive).
+# check accuracy
+#k_range = list(range(1, 16000, 500))
+#training_error = []
+#testing_error = []
 
-# Only interested in counties, so filter where COUNTY > 0
-#pop_df2 = pop_df2[pop_df2.COUNTY > 0]
+# Find test accuracy for all values of K between 1 and 100 (inclusive).
+#for k in k_range:
+#    # Instantiate the model with the current K value.
+#    knn = KNeighborsClassifier(n_neighbors=k)
+#    knn.fit(X_train, y_train)
+#    # print the accuracy
+#    y_pred_class = knn.predict(X_test)
+#    print('K value versus Accuracy: {}'.format(k), format((metrics.accuracy_score(y_test, y_pred_class))))	
 
-# now, replace 'County' and 'Parish' in CTYNAME column with blank so we only have county/parish name
-#pop_df2['CTYNAME'] = pop_df2['CTYNAME'].str.replace('County', '')
-#pop_df2['CTYNAME'] = pop_df2['CTYNAME'].str.replace('Parish', '')
 
-#pop_df2 = pop_df2.CTYNAME.str.replace('County', '')
-#pop_df2 = pop_df2.CTYNAME.str.replace('Parish', '')
+#scores = []
+#for k in k_range:
+#    knn = KNeighborsClassifier(n_neighbors=k)
+#    knn.fit(X,y)
+#    pred = knn.predict(X)
+#    score = float(sum(pred == y)) / len(y)
+#    scores.append([k, score])
 
-# check our data
-#pop_df2[pop_df2.STNAME == 'Louisiana'].CTYNAME.head(10)
+#data = df_home_wins.DataFrame(scores,columns=['k','score'])
+#data.plot.line(x='k',y='score');
 
-# https://www.census.gov/topics/education.html
-# https://factfinder.census.gov/faces/nav/jsf/pages/index.xhtml#acsST
-# https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_16_1YR_S1501&prodType=table
-# HC02_EST_VC18	Percent; Estimate; Percent bachelor's degree or higher
-# HC02_EST_VC17	Percent; Estimate; Percent high school graduate or higher
+# error rates for different k values
+# https://www.analyticsvidhya.com/blog/2018/08/k-nearest-neighbor-introduction-regression-python/
+from sklearn import neighbors
+from sklearn.metrics import mean_squared_error 
+from math import sqrt
+import matplotlib.pyplot as plt
+
+rmse_val = [] #to store rmse values for different k
+for K in range(101):
+    K = K+1
+    model = neighbors.KNeighborsRegressor(n_neighbors = K)
+
+    model.fit(X_train, y_train)  #fit the model
+    pred=model.predict(X_test) #make prediction on test set
+    error = sqrt(mean_squared_error(y_test,pred)) #calculate rmse
+    rmse_val.append(error) #store rmse values
+    print('RMSE value for k= ' , K , 'is:', error) 
+	
+
+# this is our feature set
+feature_cols = ['lead_changes', 'times_tied', 
+'three_points_made', 'two_points_made', 'blocked_att',
+'free_throws_made', 'free_throws_att', 'rebounds', 'assists', 'turnovers', 'steals', 'blocks',
+'assists_turnover_ratio', 'personal_fouls', 'ejections', 'foulouts', 'fast_break_pts', 'second_chance_pts',
+'team_turnovers', 'points_off_turnovers', 'team_rebounds']
+
+#plotting the rmse values against k values
+curve = pd.DataFrame(rmse_val) #elbow curve 
+#curve.plot()
+fig = curve.plot().get_figure()
+fig.savefig('curve.png')
+
+# best k to use is around 7.25
+# instantiate
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+
+# split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Train the model on the training set (using K=7)
+knn = KNeighborsClassifier(n_neighbors=7)
+# fit the model
+knn.fit(X_train, y_train)
+
+# Test the model on the testing set and check the accuracy
+y_pred_class = knn.predict(X_test)
+print((metrics.accuracy_score(y_test, y_pred_class)))
+
+# get the predictions
+predictions = linreg.predict(X_test)
+# Print the coefficients.
+print(linreg.intercept_)
+print(linreg.coef_)
+
+dict(zip(linreg.coef_,X.columns))
+# view the predictions
+print(predictions)
+
+## The line / model
+plt = ''
+import matplotlib.pyplot as plt
+#fig = plt.figure(figsize=(3, 6))
+#fig = plt.figure(figsize=(12, 12))
+fig = plt.figure()
+plt.scatter(y_test, predictions)
+plt.xlabel("True Values")
+plt.ylabel("Predictions")
+fig.savefig("fig2.png")
+plt.close()
+
+# and check for accuracy
+print("Score:", linreg.score(X_test, y_test))
+
+
+
+#RandomForestRegressor
+# Finding the important features
+from sklearn.ensemble import RandomForestClassifier
+
